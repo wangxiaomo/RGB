@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>RGB Color</title>
+    <link href="static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="static/css/ui/jquery-ui-1.9.1.custom.min.css" rel="stylesheet" media="screen">
+  </head>
+    <link href="static/css/style.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="content">
+        <div>
+          <div class="input-append">
+            <input type="text" id="rgb" class="span4" placeholder="Type Your RGB value Here!!!" title="click the list to focus your color.dbclick the area to remove your color!">
+            <button type="button" class="btn">change</button>
+          </div>
+        </div>
+        <div id="color" class="row-fluid">
+          <div id="color-list" class="span3">
+            <ul class="nav nav-tabs nav-stacked">
+            </ul>
+          </div>
+          <div id="color-drag-area" class="span8">
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <hr />made by xiaomo(<a href="http://wangxiaomo.github.com">http://wangxiaomo.github.com</a>).Many Thanks to DolphinQ.
+      </div>
+      <p class="more">
+        <a href="https://github.com/wangxiaomo/RGB"><img style="position: fixed; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+      </p>
+    </div>
+  </body>
+  <script src="static/js/jquery-1.8.2.min.js"></script>
+  <script src="static/js/jquery.corner.js"></script>
+  <script src="static/js/ui/jquery.ui.core.js"></script>
+  <script src="static/js/ui/jquery.ui.widget.js"></script>
+  <script src="static/js/ui/jquery.ui.mouse.js"></script>
+  <script src="static/js/ui/jquery.ui.draggable.js"></script>
+  <script src="static/js/ui/jquery.ui.resizable.js"></script>
+  <script src="static/js/ui/jquery.ui.effect.js"></script>
+  <script src="static/js/ui/jquery.ui.effect-explode.js"></script>
+  <script src="static/js/ui/jquery.ui.effect-shake.js"></script>
+  <script src="static/js/ui/jquery.ui.position.js"></script>
+  <script src="static/js/ui/jquery.ui.tooltip.js"></script>
+  <script src="static/js/underscore-min.js"></script>
+  <script src="static/js/bootstrap.min.js"></script>
+  <script>
+$(function(){
+  function render(){
+    $('.rgb-item').draggable({containment: "#color-drag-area", scroll: false})
+                  .resizable()
+                  .corner();
+  }
+  function format_rgb_color(rgb_color){
+    //TODO:检查 rgb_color 是否合法.
+    //转换#.(.)等非法字符
+    return rgb_color.replace(/[#\(\),]/g, '_');
+  }
+  function add_color(rgb_color){
+    var list_item_template = _.template($('#rgb-list-item').html());
+    var drag_item_template = _.template($('#rgb-drag-item').html());
+
+    var options = {rgb_color_id: format_rgb_color(rgb_color), rgb_color: rgb_color};
+    $('#color-list').find('ul').append(list_item_template(options));
+    $('#color-drag-area').append(drag_item_template(options))
+    render();
+  }
+  function remove_color(rgb_color_id){
+    var div_item = $('div.item_' + rgb_color_id);
+    var li_item = $('li.item_' + rgb_color_id);
+    $(div_item).effect('explode', {}, 500);
+    $(div_item).remove();
+    li_item.fadeOut(1000, function(){ li_item.remove(); });
+  }
+
+  $(document).tooltip({track: true});
+  render();
+
+  $('button').click(function(){
+    add_color($('#rgb').attr('value'));
+    $('#rgb').attr('value', '');
+    render();
+  });
+  $('#rgb').on('keyup', function(e){
+    e.preventDefault();
+    if(e.keyCode == '13'){
+      $('button').click();
+    }
+  });
+  $(document).on('click', 'a[href=#]', function(e){
+    $('div.item_' + $(this).closest('li').attr('data-rgb')).effect('shake', {}, 500);
+    //disable the a[href=#] link
+    return false;
+  });
+  $(document).on('dblclick', 'div.rgb-item', function(e){
+    e.preventDefault();
+    remove_color($(this).attr('data-rgb'));
+  });
+
+  // test data
+  add_color('#FFC125');
+  add_color('#FF1493');
+  add_color('#F4F4F4');
+  add_color('#ADFF2F');
+  add_color('#121212');
+  add_color('red');
+  add_color('rgb(0,132,124)')
+  $('.item__FFC125').css('left', '17px').css('top', '47px');
+  $('.item__FF1493').css('left', '73px').css('top', '68px');
+  $('.item__F4F4F4').css('left', '234px').css('top', '4px');
+  $('.item__ADFF2F').css('left', '123px').css('top', '152px');
+  $('.item__121212').css('left', '149px').css('top', '6px');
+  $('.item_red').css('left', '0px').css('top', '9px');
+  $('div.item_rgb_0_132_124_').css('left', '279px').css('top', '-17px').css('width', '110px');
+});
+  </script>
+  <!-- script template -->
+  <script type="text/template" id="rgb-list-item">
+<li class="rgb_item item_<%= rgb_color_id %>" data-rgb="<%= rgb_color_id %>"><a href="#"><div style="float:left;width:25px;background:<%= rgb_color %>;">&nbsp;</div><%= rgb_color %></a></li>
+  </script>
+  <script type="text/template" id="rgb-drag-item">
+<% if(rgb_color!='#000' && rgb_color!='#000000' && rgb_color!='black'){ %>
+  <div class="rgb-item item_<%= rgb_color_id %>" style="background:<%= rgb_color %>" draggable="true" data-rgb="<%= rgb_color_id %>">&nbsp;</div>
+<% }else{ %>
+  <div class="rgb-item item_<%= rgb_color_id %>" style="background:<%= rgb_color %>" draggable="true" data-rgb="<%= rgb_color_id %>">&nbsp;</div>
+<% } %>
+  </script>
+  <!-- template over -->
+</html>
